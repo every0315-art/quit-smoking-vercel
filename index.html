@@ -213,18 +213,20 @@
 
   /* Emergency Button */
   .emergency-btn {
-    display: block; width: 100%; padding: 22px;
-    background: var(--red); border: none; border-radius: 16px;
-    color: #fff; font-size: 22px; font-weight: 900;
-    cursor: pointer; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center;
+    width: 200px; height: 200px;
+    background: var(--red); border: none; border-radius: 50%;
+    color: #fff; font-size: 18px; font-weight: 900;
+    cursor: pointer; margin: 0 auto 20px;
     box-shadow: 0 0 0 4px rgba(239,68,68,0.25);
     animation: pulse-ring 1.8s ease-in-out infinite;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.5px; text-align: center; line-height: 1.4;
   }
   .emergency-btn:active { transform: scale(0.97); }
   .emergency-btn.dimmed {
     background: var(--surface2); box-shadow: none;
-    animation: none; color: var(--text2); font-size: 15px; padding: 14px;
+    animation: none; color: var(--text2); font-size: 15px;
+    width: 200px; height: 200px;
   }
   @keyframes pulse-ring {
     0%   { box-shadow: 0 0 0 0px rgba(239,68,68,0.4); }
