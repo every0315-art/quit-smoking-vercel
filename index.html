@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ラストスモーク</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --green: #22c55e;
+    --orange: #f97316;
+    --red: #ef4444;
+    --text: #e8eaf6;
+    --text2: #8b92a9;
+    --border: #2d3250;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .app { max-width: 480px; margin: 0 auto; padding: 16px; padding-bottom: 100px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0 24px;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header span { font-size: 24px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px; background: var(--surface);
+    border-radius: 12px; padding: 4px; margin-bottom: 20px;
+  }
+  .tab {
+    padding: 14px 8px; border: none; border-radius: 10px;
+    background: transparent; color: var(--text2); font-size: 15px;
+    cursor: pointer; transition: all 0.2s; font-weight: 500;
+  }
+  .tab.active { background: var(--accent); color: #fff; font-weight: 700; }
+
+  /* Setup Screen */
+  .setup-card {
+    background: var(--surface); border-radius: 16px; padding: 28px;
+    text-align: center;
+  }
+  .setup-card h2 { font-size: 22px; margin-bottom: 8px; }
+  .setup-card p { color: var(--text2); margin-bottom: 24px; font-size: 14px; }
+  .form-group { margin-bottom: 16px; text-align: left; }
+  .form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 12px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 15px;
+  }
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--accent);
+    border: none; border-radius: 12px; color: #fff;
+    font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  /* Counter Section */
+  .counter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .counter-card {
+    background: var(--surface); border-radius: 14px; padding: 20px 16px;
+    text-align: center; border: 1px solid var(--border);
+  }
+  .counter-card .label { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .counter-card .value { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .counter-card .unit { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .counter-main {
+    background: linear-gradient(135deg, #1a1d27, #22263a);
+    border-radius: 16px; padding: 28px; text-align: center;
+    margin-bottom: 16px; border: 1px solid var(--border);
+  }
+  .counter-main .big-num {
+    font-size: 64px; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .counter-main .big-label { color: var(--text2); margin-top: 8px; font-size: 15px; }
+  .streak-bar { display: flex; gap: 4px; margin-top: 16px; justify-content: center; }
+  .streak-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+  }
+  .streak-dot.done { background: var(--green); border-color: var(--green); }
+
+  /* Craving Section */
+  .craving-big {
+    background: linear-gradient(135deg, #1e1030, #1a1d27);
+    border: 1px solid #4f2d8e; border-radius: 16px;
+    padding: 28px; text-align: center; margin-bottom: 16px;
+  }
+  .craving-big h2 { font-size: 20px; margin-bottom: 6px; }
+  .craving-big p { color: var(--text2); font-size: 14px; margin-bottom: 20px; }
+  .craving-timer {
+    font-size: 48px; font-weight: 900; color: #a855f7;
+    margin: 12px 0;
+  }
+  .technique-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .technique-card {
+    background: var(--surface); border-radius: 12px; padding: 16px 12px;
+    text-align: center; border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .technique-card:hover { border-color: var(--accent); background: var(--surface2); }
+  .technique-card .icon { font-size: 28px; margin-bottom: 6px; }
+  .technique-card .name { font-size: 13px; font-weight: 600; }
+  .technique-card .desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* Breathing Exercise */
+  .breathing-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .breathing-modal.show { display: flex; }
+  .breathing-inner {
+    background: var(--surface); border-radius: 20px;
+    padding: 40px 32px; text-align: center; max-width: 320px; width: 90%;
+  }
+  .breath-circle {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, #4f8ef7 0%, #1a1d27 70%);
+    margin: 24px auto; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600; transition: transform 4s ease-in-out;
+  }
+  .breath-circle.inhale { transform: scale(1.4); }
+  .breath-circle.exhale { transform: scale(0.8); }
+  .btn-close {
+    margin-top: 20px; padding: 10px 24px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer; font-size: 14px;
+  }
+
+  /* Timeline Section */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .timeline-item {
+    position: relative; margin-bottom: 20px;
+    background: var(--surface); border-radius: 12px;
+    padding: 14px 16px; border: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+  .timeline-item.reached { border-color: var(--green); }
+  .timeline-item.reached .tl-dot { background: var(--green); }
+  .timeline-item.upcoming { opacity: 0.5; }
+  .tl-dot {
+    position: absolute; left: -28px; top: 16px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--border); border: 2px solid var(--bg);
+  }
+  .tl-time { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 600; }
+  .tl-desc { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .tl-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 600; margin-top: 6px;
+    background: var(--green); color: #000;
+  }
+
+  /* Learn Section */
+  .learn-card {
+    background: var(--surface); border-radius: 14px;
+    padding: 18px; border: 1px solid var(--border); margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .learn-card .lc-top {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .learn-card .lc-icon { font-size: 32px; }
+  .learn-card .lc-title { font-size: 15px; font-weight: 600; }
+  .learn-card .lc-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .learn-card .lc-body {
+    display: none; margin-top: 14px; font-size: 13px;
+    color: var(--text2); line-height: 1.7; border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .learn-card.open .lc-body { display: block; }
+
+  /* Notification Banner */
+  .notif-banner {
+    position: fixed; top: 12px; left: 12px; right: 12px;
+    background: var(--surface); color: var(--text); padding: 12px 16px;
+    border-radius: 14px; font-size: 13px; font-weight: 500;
+    z-index: 200; opacity: 0; transition: opacity 0.3s;
+    border: 1px solid var(--border); line-height: 1.5;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .notif-banner.show { opacity: 1; }
+
+  .section-title { font-size: 13px; color: var(--text2); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; }
+  .reset-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; margin-top: 8px;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Emergency Button */
+  .emergency-btn {
+    display: block; width: 100%; padding: 22px;
+    background: var(--red); border: none; border-radius: 16px;
+    color: #fff; font-size: 22px; font-weight: 900;
+    cursor: pointer; margin-bottom: 20px;
+    box-shadow: 0 0 0 4px rgba(239,68,68,0.25);
+    animation: pulse-ring 1.8s ease-in-out infinite;
+    letter-spacing: 0.5px;
+  }
+  .emergency-btn:active { transform: scale(0.97); }
+  .emergency-btn.dimmed {
+    background: var(--surface2); box-shadow: none;
+    animation: none; color: var(--text2); font-size: 15px; padding: 14px;
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0px rgba(239,68,68,0.4); }
+    70%  { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0px rgba(239,68,68,0); }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- Notification Banner -->
+  <div class="notif-banner" id="notifBanner"></div>
+
+  <!-- Setup Screen -->
+  <div id="setupScreen">
+    <div class="header">
+      <h1>🚬 ラストスモーク</h1>
+    </div>
+    <div class="setup-card">
+      <h2>禁煙を始めよう</h2>
+      <p>あなたのデータを入力して、禁煙をサポートします</p>
+      <div class="form-group">
+        <label>禁煙開始日時</label>
+        <input type="datetime-local" id="startDate">
+      </div>
+      <div class="form-group">
+        <label>1日の喫煙本数</label>
+        <input type="number" id="cigarettesPerDay" value="20" min="1">
+      </div>
+      <div class="form-group">
+        <label>タバコ1箱の価格（円）</label>
+        <input type="number" id="pricePerPack" value="580" min="100">
+      </div>
+      <div class="form-group">
+        <label>目標日数（ENDゴール）</label>
+        <input type="number" id="goalDays" value="100" min="1">
+      </div>
+      <button class="btn-primary" onclick="startQuit()">禁煙スタート 🚀</button>
+    </div>
+  </div>
+
+  <!-- Main Screen -->
+  <div id="mainScreen" style="display:none;">
+    <div class="header">
+      <h1>🚬 ラストスモーク</h1>
+      <span id="motivEmoji">💪</span>
+    </div>
+
+    <div class="tabs" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">
+      <button class="tab active" onclick="showTab('home')">🏠 ホーム</button>
+      <button class="tab" onclick="showTab('therapy')">🕊️ 解放</button>
+    </div>
+
+    <button class="emergency-btn" onclick="openCraving()" id="emergencyBtn">
+      🚨 吸いたい衝動が到来
+    </button>
+
+    <!-- Home Tab -->
+    <div id="tab-home">
+      <div class="counter-card" style="padding:20px; margin-bottom:14px; border-left:3px solid #a855f7; border-radius:14px;">
+        <div id="dailyMessageTop" style="font-size:16px; line-height:1.7; font-weight:500;"></div>
+      </div>
+      <div class="counter-main">
+        <div class="big-num" id="daysCount">0</div>
+        <div class="big-label">日間 禁煙継続中 🎉</div>
+        <div class="streak-bar" id="streakBar"></div>
+        <div style="margin-top:14px;width:100%;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;">
+            <span>目標まで</span><span id="goalLabel"></span>
+          </div>
+          <div style="background:var(--surface2);border-radius:6px;height:6px;overflow:hidden;">
+            <div id="goalBar" style="height:100%;background:linear-gradient(90deg,#4f8ef7,#a855f7);border-radius:6px;transition:width 0.5s;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="counter-grid">
+        <div class="counter-card">
+          <div class="label">節約金額</div>
+          <div class="value" id="savedMoney">0</div>
+          <div class="unit">円</div>
+        </div>
+        <div class="counter-card">
+          <div class="label">吸わなかった本数</div>
+          <div class="value" id="savedCigs">0</div>
+          <div class="unit">本</div>
+        </div>
+        <div class="counter-card">
+          <div class="label">経過時間</div>
+          <div class="value" id="hoursCount">0</div>
+          <div class="unit">時間</div>
+        </div>
+        <div class="counter-card">
+          <div class="label">取り戻した命</div>
+          <div class="value" id="lifeGained">0</div>
+          <div class="unit">分</div>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetApp()">⚠️ リセット（再スタート）</button>
+    </div>
+
+    <!-- Craving Tab (hidden, content moved to modal) -->
+    <div id="tab-craving" style="display:none;"></div>
+
+    <!-- Therapy Tab -->
+    <div id="tab-therapy" style="display:none;">
+      <p class="section-title">タバコの罠から自由になる考え方</p>
+      <div id="therapyContent"></div>
+    </div>
+
+    <!-- Timeline Tab -->
+    <div id="tab-timeline" style="display:none;">
+      <p class="section-title">禁煙後の健康回復タイムライン</p>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <!-- Learn Tab -->
+    <div id="tab-learn" style="display:none;">
+      <p class="section-title">ニコチン依存のメカニズムを学ぶ</p>
+      <div id="learnContent"></div>
+    </div>
+  </div>
+
+  <!-- END Modal -->
+  <div class="breathing-modal" id="endModal">
+    <div class="breathing-inner" style="max-width:340px;width:92%;text-align:center;">
+      <div style="font-size:64px;margin-bottom:8px;">🏆</div>
+      <h2 style="font-size:26px;margin-bottom:4px;">END</h2>
+      <p style="color:#a855f7;font-size:15px;font-weight:700;margin-bottom:16px;">目標達成おめでとう！</p>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid #4f2d8e;">
+        <p style="font-size:15px;line-height:1.8;color:var(--text);">あなたは今、<strong>非喫煙者</strong>です。<br>ニコチンの罠から完全に自由になりました。<br>これがあなたの本来の姿です。</p>
+      </div>
+      <div id="endStats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;"></div>
+      <button class="btn-primary" onclick="document.getElementById('endModal').classList.remove('show')" style="background:#a855f7;">続ける ✨</button>
+    </div>
+  </div>
+
+  <!-- Craving Modal -->
+  <div class="breathing-modal" id="cravingModal">
+    <div class="breathing-inner" style="max-width:360px; width:92%; max-height:90vh; overflow-y:auto;">
+      <h2>🔥 吸いたい衝動</h2>
+      <p style="color:var(--text2); font-size:13px; margin-top:8px;">この感覚はニコチンが切れたときの<strong style="color:#a855f7">小さな身体反応</strong>です。<br>3〜5分で必ず引きます。波が来たら乗り越えるだけ。</p>
+      <div id="cravingThought" style="background:var(--surface2);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.6;border-left:3px solid #a855f7;"></div>
+      <div class="craving-timer" id="cravingTimer" style="margin:16px 0;">05:00</div>
+      <button class="btn-primary" id="cravingBtn" onclick="toggleCravingTimer()" style="max-width:200px; margin:0 auto 20px;">
+        タイマースタート
+      </button>
+      <div style="border-top:1px solid var(--border); padding-top:16px; text-align:left;">
+        <p class="section-title">対処テクニック</p>
+        <div class="technique-grid">
+          <div class="technique-card" onclick="openBreathing()">
+            <div class="icon">🌬️</div>
+            <div class="name">深呼吸</div>
+            <div class="desc">4-7-8呼吸法でリラックス</div>
+          </div>
+          <div class="technique-card" onclick="showTechnique('water')">
+            <div class="icon">💧</div>
+            <div class="name">水を飲む</div>
+            <div class="desc">冷たい水を1杯ゆっくり飲む</div>
+          </div>
+          <div class="technique-card" onclick="showTechnique('walk')">
+            <div class="icon">🚶</div>
+            <div class="name">その場を離れる</div>
+            <div class="desc">5分間その場を歩き回る</div>
+          </div>
+          <div class="technique-card" onclick="showTechnique('think')">
+            <div class="icon">🧠</div>
+            <div class="name">なぜ禁煙？</div>
+            <div class="desc">禁煙の理由を思い出す</div>
+          </div>
+          <div class="technique-card" onclick="showTechnique('hands')">
+            <div class="icon">✋</div>
+            <div class="name">手を使う</div>
+            <div class="desc">ストレスボールや鉛筆を持つ</div>
+          </div>
+          <div class="technique-card" onclick="showTechnique('delay')">
+            <div class="icon">⏰</div>
+            <div class="name">10分待つ</div>
+            <div class="desc">ただ10分だけ待ってみる</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-close" onclick="closeCraving()" style="margin-top:16px; width:100%;">✕ 閉じる</button>
+    </div>
+  </div>
+
+  <!-- Breathing Modal -->
+  <div class="breathing-modal" id="breathingModal">
+    <div class="breathing-inner">
+      <h2>🌬️ 4-7-8 呼吸法</h2>
+      <p style="color:var(--text2); font-size:13px; margin-top:8px;" id="breathPhase">準備してください</p>
+      <div class="breath-circle" id="breathCircle">始める</div>
+      <p style="color:var(--text2); font-size:12px;">サイクル <span id="breathCycle">0</span> / 4</p>
+      <button class="btn-close" onclick="closeBreathing()">閉じる</button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- Bottom Nav -->
+  <div style="position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; padding:8px 16px 24px; gap:6px; z-index:50;">
+    <button class="tab" id="btn-timeline" onclick="showTab('timeline')">💚 回復</button>
+    <button class="tab" id="btn-learn" onclick="showTab('learn')">📖 学ぶ</button>
+  </div>
+
+<script>
+const MESSAGES = [
+  "あなたは今、何かを「我慢」しているのではありません。タバコという罠から自由になっています 🕊️",
+  "「吸いたい」という感覚は、ニコチンという小さな怪物が弱っているサインです。喜びましょう 🌱",
+  "喫煙者は吸うたびに渇望を作り出し、それを一時的に満たすだけです。あなたはその連鎖を断ち切りました 🔗",
+  "タバコはストレスを解消しません。タバコが作り出したストレスをタバコで一時的に和らげるだけでした 💡",
+  "非喫煙者はタバコなしで楽しみ、リラックスし、ストレスに対処しています。あなたも今そうしています ✨",
+  "禁煙は意志力の戦いではありません。ニコチンの罠の仕組みを理解した人が、自然と自由になるのです 🧠",
+  "あなたの肺は今この瞬間も、少しずつ本来の姿を取り戻しています 🫁",
+  "節約できたお金は、あなたが本当に大切にしているものへ使えます 💰",
+  "「一本だけ」は存在しません。一本は次の一本への渇望を生み出すだけです 🚫",
+  "禁煙した今、あなたは毎朝タバコのことを考えずに目を覚ますことができます。これが本当の自由です 🌅",
+  "タバコは喜びを与えていたのではなく、タバコが奪っていた喜びを少し返していただけでした 🎭",
+  "あなたは今、喫煙者が羨む立場にいます。非喫煙者であること、それが本来の人間の姿です 🏆",
+];
+
+const TIMELINE_EVENTS = [
+  { time: "20分後", minutes: 20, title: "血圧・脈拍が正常化", desc: "血圧と心拍数が喫煙前の値に戻り始めます。" },
+  { time: "8時間後", minutes: 480, title: "血中酸素濃度が正常に", desc: "一酸化炭素が半減し、血液の酸素運搬能力が回復します。" },
+  { time: "24時間後", minutes: 1440, title: "心臓発作リスクが低下", desc: "ニコチンが体内から完全に排出されます。" },
+  { time: "48時間後", minutes: 2880, title: "味覚・嗅覚が戻り始める", desc: "神経末端が再生し始め、味や香りを感じやすくなります。" },
+  { time: "72時間後", minutes: 4320, title: "呼吸が楽になる", desc: "気管支が弛緩し、肺活量が増加します。" },
+  { time: "2週間後", minutes: 20160, title: "血行が改善", desc: "歩行が楽になり、肺機能が最大30%向上します。" },
+  { time: "1ヶ月後", minutes: 43200, title: "咳・痰が減少", desc: "肺の線毛が再生し、感染症への抵抗力が上がります。" },
+  { time: "1年後", minutes: 525600, title: "心臓病リスクが半減", desc: "喫煙者と比べ、心臓病のリスクが約半分になります。" },
+  { time: "5年後", minutes: 2628000, title: "脳卒中リスクが正常化", desc: "脳卒中リスクが非喫煙者と同等になります。" },
+  { time: "10年後", minutes: 5256000, title: "肺がんリスクが半減", desc: "肺がんによる死亡リスクが喫煙者の半分まで低下します。" },
+];
+
+const LEARN_ITEMS = [
+  {
+    icon: "🧬", title: "ニコチン依存のしくみ", sub: "脳への影響を理解する",
+    body: `タバコを吸うと、ニコチンは肺から血流に入り、わずか<strong>7〜10秒で脳</strong>に到達します。脳内でドーパミンが放出され、一時的な快感をもたらします。<br><br>ところが血中ニコチンが下がると不安・イライラが生じます。次の一本でそれが消える。これを繰り返すうちに脳は「タバコ＝安心」と学習します。<br><br>つまりタバコは、<strong>自分が作り出した渇望を自分で満たすだけ</strong>の罠です。`
+  },
+  {
+    icon: "⏱️", title: "衝動は3〜5分で消える", sub: "渇望の正体を知る",
+    body: `「吸いたい！」という衝動は、実は<strong>平均3〜5分でピーク</strong>を迎え、その後自然に引いていきます。<br><br>この衝動はニコチンが切れたときの「小さな身体的反応」に過ぎません。波のように来ては引く。一度その本質を理解すると、衝動が来るたびに「また来た。でももうすぐ消える」と冷静に見ていられます。<br><br>衝動に勝つごとに、次の衝動は弱くなります。`
+  },
+  {
+    icon: "💡", title: "「我慢」ではなく「解放」", sub: "考え方を切り替える",
+    body: `禁煙を「好きなものを我慢している」と感じていませんか？<br><br>実はそれは逆です。タバコはあなたに喜びを与えていたのではなく、<strong>タバコが奪っていた喜びを少し返していただけ</strong>でした。<br><br>非喫煙者は特別な努力なしに、食事・運動・会話を楽しみ、ストレスにも対処しています。あなたは今、その本来の状態に戻りつつあります。失っているのではなく、<strong>取り戻しているのです</strong>。`
+  },
+  {
+    icon: "🎭", title: "タバコとストレスの嘘", sub: "錯覚を見抜く",
+    body: `「タバコを吸うとリラックスできる」というのは、ニコチン依存が作り出した<strong>錯覚</strong>です。<br><br>喫煙者が感じるストレスや不安の多くは、ニコチン切れによるものです。タバコを吸ってその不安が消えるのは、タバコが問題を解決したのではなく、<strong>タバコが作り出した問題を一時的に解消しただけ</strong>。<br><br>禁煙後しばらくすると、慢性的な不安感が減ったと感じる人が多いのはこのためです。`
+  },
+  {
+    icon: "🚫", title: "「一本だけ」は存在しない", sub: "罠に戻らないために",
+    body: `禁煙後に「一本だけ試しに」と思う瞬間が来るかもしれません。<br><br>しかし一本吸えば、眠っていたニコチン受容体が再び目を覚まします。一本は次の渇望を生み出し、すぐに元の喫煙習慣に戻るリスクがあります。<br><br>「一本だけ」は存在しません。それを知っているだけで、誘惑に対して強くなれます。`
+  },
+  {
+    icon: "🫁", title: "肺の自己回復力", sub: "身体は正直に応える",
+    body: `肺には驚くべき自己修復能力があります。禁煙後、数週間で<strong>線毛（せんもう）</strong>が再生し、汚れを外に排出し始めます。<br><br>一時的に咳が増えることがありますが、それは肺が回復しているサインです。数週間で咳は落ち着き、呼吸が楽になっていきます。<br><br>身体はあなたの決断に、正直に応えています。`
+  },
+];
+
+let quitData = null;
+let cravingInterval = null;
+let cravingSeconds = 300;
+let cravingRunning = false;
+let breathInterval = null;
+
+function init() {
+  const saved = localStorage.getItem('quitData');
+  if (saved) {
+    quitData = JSON.parse(saved);
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    buildLearn();
+    buildTimeline();
+    updateHome();
+    setInterval(updateHome, 1000);
+    requestNotifPermission();
+  } else {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('startDate').value = now.toISOString().slice(0,16);
+  }
+}
+
+function startQuit() {
+  const startDate = document.getElementById('startDate').value;
+  const cigs = parseInt(document.getElementById('cigarettesPerDay').value);
+  const price = parseInt(document.getElementById('pricePerPack').value);
+  if (!startDate || !cigs || !price) { alert('全ての項目を入力してください'); return; }
+  const goal = parseInt(document.getElementById('goalDays').value) || 100;
+  quitData = { startDate, cigarettesPerDay: cigs, pricePerPack: price, goalDays: goal };
+  localStorage.setItem('quitData', JSON.stringify(quitData));
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'block';
+  buildLearn();
+  buildTimeline();
+  updateHome();
+  setInterval(updateHome, 1000);
+  requestNotifPermission();
+  showNotif('禁煙スタート！一緒に頑張ろう 🚀');
+
+}
+
+function resetApp() {
+  if (!confirm('本当にリセットしますか？記録がすべて消えます。')) return;
+  localStorage.removeItem('quitData');
+  location.reload();
+}
+
+function updateHome() {
+  const start = new Date(quitData.startDate);
+  const now = new Date();
+  const diffMs = now - start;
+  const diffMins = diffMs / 60000;
+  const diffHours = diffMs / 3600000;
+  const diffDays = diffMs / 86400000;
+
+  const days = Math.floor(diffDays);
+  const hours = Math.floor(diffHours);
+  const cigsPerMin = quitData.cigarettesPerDay / 1440;
+  const savedCigs = Math.floor(diffMins * cigsPerMin);
+  const savedMoney = Math.floor(savedCigs / 20 * quitData.pricePerPack);
+  const lifeGained = Math.floor(savedCigs * 11); // ~11 min per cig
+
+  document.getElementById('daysCount').textContent = days;
+  document.getElementById('hoursCount').textContent = hours;
+  document.getElementById('savedCigs').textContent = savedCigs.toLocaleString();
+  document.getElementById('savedMoney').textContent = savedMoney.toLocaleString();
+  document.getElementById('lifeGained').textContent = lifeGained.toLocaleString();
+
+  // Streak dots (last 7 days)
+  const bar = document.getElementById('streakBar');
+  bar.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (days >= (6 - i + 1) || (i === 6 - Math.floor(diffDays % 1)) ? ' done' : '');
+    if (i <= days) dot.classList.add('done');
+    bar.appendChild(dot);
+  }
+
+  // Emoji based on days
+  const emojis = ['🌱','💪','⭐','🔥','🏆','💎','🚀'];
+  document.getElementById('motivEmoji').textContent = emojis[Math.min(days, emojis.length - 1)];
+
+  // Daily message
+  document.getElementById('dailyMessageTop').textContent = MESSAGES[days % MESSAGES.length];
+
+  // Update timeline
+  buildTimeline();
+
+  // Goal progress bar
+  const goal = quitData.goalDays || 100;
+  const pct = Math.min(100, Math.floor(days / goal * 100));
+  document.getElementById('goalBar').style.width = pct + '%';
+  document.getElementById('goalLabel').textContent = days >= goal ? '🏆 END 達成！' : `${days}/${goal}日 (${pct}%)`;
+  const goalReached = days >= goal;
+  const alreadyShown = localStorage.getItem('endShown_' + goal);
+  if (goalReached && !alreadyShown) {
+    localStorage.setItem('endShown_' + goal, '1');
+    const stats = document.getElementById('endStats');
+    stats.innerHTML = `
+      <div class="counter-card"><div class="label">禁煙日数</div><div class="value" style="font-size:20px;">${days}</div><div class="unit">日</div></div>
+      <div class="counter-card"><div class="label">節約金額</div><div class="value" style="font-size:20px;">${savedMoney.toLocaleString()}</div><div class="unit">円</div></div>
+    `;
+    setTimeout(() => document.getElementById('endModal').classList.add('show'), 500);
+  }
+}
+
+function buildTimeline() {
+  if (!quitData) return;
+  const start = new Date(quitData.startDate);
+  const now = new Date();
+  const elapsedMins = (now - start) / 60000;
+  const container = document.getElementById('timeline');
+  container.innerHTML = '';
+  TIMELINE_EVENTS.forEach(ev => {
+    const reached = elapsedMins >= ev.minutes;
+    const div = document.createElement('div');
+    div.className = 'timeline-item ' + (reached ? 'reached' : 'upcoming');
+    div.innerHTML = `
+      <div class="tl-dot"></div>
+      <div class="tl-time">${ev.time}</div>
+      <div class="tl-title">${ev.title}</div>
+      <div class="tl-desc">${ev.desc}</div>
+      ${reached ? '<span class="tl-badge">✓ 達成！</span>' : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function buildLearn() {
+  const container = document.getElementById('learnContent');
+  LEARN_ITEMS.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'learn-card';
+    div.innerHTML = `
+      <div class="lc-top">
+        <div class="lc-icon">${item.icon}</div>
+        <div>
+          <div class="lc-title">${item.title}</div>
+          <div class="lc-sub">${item.sub}</div>
+        </div>
+      </div>
+      <div class="lc-body">${item.body}</div>
+    `;
+    div.onclick = () => div.classList.toggle('open');
+    container.appendChild(div);
+  });
+}
+
+const THERAPY_ITEMS = [
+  {
+    icon: "🕊️", title: "禁煙は「我慢」ではない", sub: "考え方の転換",
+    body: `禁煙を「好きなものを捨てる我慢」と感じていませんか？<br><br>実はこう考えてみてください。タバコはあなたに何かを「与えて」いたのではなく、タバコ自身が作り出した渇望をタバコ自身が満たしていただけです。<br><br>つまりあなたは今、何かを失っているのではなく、<strong>ニコチンの罠から自由になっています</strong>。それは非常にポジティブなことです。`
+  },
+  {
+    icon: "👾", title: "「小さな怪物」と「大きな怪物」", sub: "二つの依存を理解する",
+    body: `ニコチン依存には二つの側面があります。<br><br><strong>身体的依存（小さな怪物）：</strong>ニコチンが切れると生じるわずかな身体的不快感。これは禁煙後数日で消えていきます。<br><br><strong>心理的依存（大きな怪物）：</strong>「タバコ＝リラックス・喜び」という思い込み。こちらの方が長く続きます。<br><br>大きな怪物を倒すのは、仕組みを<strong>理解すること</strong>です。「この衝動はただの思い込みだ」と気づいた瞬間、その力は弱まります。`
+  },
+  {
+    icon: "🌊", title: "衝動は波のようなもの", sub: "乗り越え方を知る",
+    body: `衝動が来たとき、それと戦おうとすると苦しくなります。<br><br>波をブロックしようとするのではなく、<strong>波が来て、去るのを観察する</strong>というイメージを持ってみてください。「また来た。3〜5分で消える。ただ待つだけだ」と。<br><br>衝動は戦う相手ではなく、通り過ぎるのを待つ波です。そしてその波は、来るたびに少しずつ小さくなっていきます。`
+  },
+  {
+    icon: "🎯", title: "「一本だけ」の罠", sub: "戻らないための知識",
+    body: `禁煙中に「一本だけなら大丈夫では？」という考えが浮かぶことがあります。<br><br>しかしニコチンには「一本だけ」を許さない性質があります。一本吸うと再び渇望が生まれ、それを満たすためにまた吸い、あっという間に元の習慣に戻ります。<br><br><strong>「一本だけ」は存在しません。</strong>これを知っているだけで、その誘惑に対して格段に強くなれます。`
+  },
+  {
+    icon: "✨", title: "非喫煙者として生きる", sub: "本来の姿に戻る",
+    body: `あなたが子どもだったころ、タバコなしで笑い、泣き、楽しみ、ストレスに対処していました。それがあなたの本来の姿です。<br><br>非喫煙者は特別な努力なしに、食事を楽しみ、映画を観て感動し、友人と笑い、仕事のプレッシャーをこなしています。<br><br>あなたは今、<strong>その状態に戻ろうとしています</strong>。禁煙は終点ではなく、本来の自分への帰還です。`
+  },
+  {
+    icon: "💬", title: "自分への声かけを変える", sub: "言葉が感情を作る",
+    body: `「タバコが吸えない」→「タバコを必要としていない」<br>「禁煙しなければ」→「禁煙できている」<br>「我慢している」→「自由になっている」<br><br>同じ状況でも、言葉ひとつで感情は大きく変わります。<br><br>ネガティブな言い方は意志力を消耗させます。<strong>ポジティブな言い方は、その状態を当たり前にしていきます</strong>。毎日少しずつ、自分への声かけを変えていきましょう。`
+  },
+];
+
+function buildTherapy() {
+  const container = document.getElementById('therapyContent');
+  if (container.children.length > 0) return;
+  THERAPY_ITEMS.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'learn-card';
+    div.innerHTML = `
+      <div class="lc-top">
+        <div class="lc-icon">${item.icon}</div>
+        <div>
+          <div class="lc-title">${item.title}</div>
+          <div class="lc-sub">${item.sub}</div>
+        </div>
+      </div>
+      <div class="lc-body">${item.body}</div>
+    `;
+    div.onclick = () => div.classList.toggle('open');
+    container.appendChild(div);
+  });
+}
+
+const CRAVING_THOUGHTS = [
+  "この感覚はニコチンという小さな怪物が弱っているサイン。怪物が消えていく証拠です。",
+  "波が来ました。でも波は必ず引きます。ただ3〜5分待つだけでいい。",
+  "タバコはこの不快感を解消しません。タバコがこの不快感を作り出しているのです。",
+  "今この衝動に勝てば、次の衝動はわずかに弱くなります。",
+  "あなたは何かを我慢しているのではありません。罠から抜け出しているのです。",
+  "「一本だけ」は存在しません。知っているからこそ、強くいられます。",
+];
+
+function showTab(tab) {
+  ['home','craving','therapy','timeline','learn'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  const tabMap = { home: 0, therapy: 1, timeline: 2, learn: 3 };
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', i === tabMap[tab]);
+  });
+  if (tab === 'timeline') buildTimeline();
+  if (tab === 'therapy') buildTherapy();
+}
+
+// Craving Modal
+function openCraving() {
+  const thought = CRAVING_THOUGHTS[Math.floor(Math.random() * CRAVING_THOUGHTS.length)];
+  document.getElementById('cravingThought').textContent = thought;
+  document.getElementById('cravingModal').classList.add('show');
+}
+function closeCraving() {
+  document.getElementById('cravingModal').classList.remove('show');
+  if (cravingRunning) {
+    clearInterval(cravingInterval);
+    cravingRunning = false;
+    cravingSeconds = 300;
+    document.getElementById('cravingTimer').textContent = '05:00';
+    document.getElementById('cravingBtn').textContent = 'タイマースタート';
+  }
+}
+
+// Craving Timer
+function toggleCravingTimer() {
+  if (cravingRunning) {
+    clearInterval(cravingInterval);
+    cravingRunning = false;
+    cravingSeconds = 300;
+    document.getElementById('cravingTimer').textContent = '05:00';
+    document.getElementById('cravingBtn').textContent = 'タイマースタート';
+  } else {
+    cravingRunning = true;
+    document.getElementById('cravingBtn').textContent = 'リセット';
+    cravingInterval = setInterval(() => {
+      cravingSeconds--;
+      const m = Math.floor(cravingSeconds / 60);
+      const s = cravingSeconds % 60;
+      document.getElementById('cravingTimer').textContent =
+        String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      if (cravingSeconds <= 0) {
+        clearInterval(cravingInterval);
+        cravingRunning = false;
+        cravingSeconds = 300;
+        document.getElementById('cravingTimer').textContent = '✅ 乗り越えた！';
+        document.getElementById('cravingBtn').textContent = 'もう一度';
+        showNotif('クレービング克服！素晴らしい 🎉');
+      }
+    }, 1000);
+  }
+}
+
+function showTechnique(type) {
+  const msgs = {
+    water: '💧 冷たい水を1杯、ゆっくり飲んでください。飲み終わる頃には衝動が和らぐはずです。',
+    walk: '🚶 今すぐ立ち上がって、5分間その場を歩き回りましょう。場所を変えるだけで気持ちが変わります。',
+    think: '🧠 目を閉じて、禁煙を決意した理由を3つ思い浮かべてみてください。',
+    hands: '✋ 手元にあるものを握ってみてください。ストレスボール、ペン、スマホ何でもOK。手を動かすと衝動が弱まります。',
+    delay: '⏰ 「10分だけ我慢する」と決めてください。10分後にまだ吸いたければその時また考えましょう。'
+  };
+  showNotif(msgs[type]);
+}
+
+// Breathing Exercise
+let breathPhase = 0;
+let breathCycle = 0;
+let breathDone = false;
+
+function openBreathing() {
+  document.getElementById('breathingModal').classList.add('show');
+  breathCycle = 0;
+  startBreathCycle();
+}
+
+function startBreathCycle() {
+  if (breathCycle >= 4) {
+    document.getElementById('breathPhase').textContent = '完了！気持ちが落ち着きましたか？ 😌';
+    document.getElementById('breathCircle').textContent = '完了';
+    return;
+  }
+  const circle = document.getElementById('breathCircle');
+  const phase = document.getElementById('breathPhase');
+
+  // Inhale 4s
+  phase.textContent = '鼻から吸う（4秒）';
+  circle.textContent = '吸う';
+  circle.className = 'breath-circle inhale';
+  setTimeout(() => {
+    // Hold 7s
+    phase.textContent = '息を止める（7秒）';
+    circle.textContent = '止める';
+    circle.className = 'breath-circle';
+    setTimeout(() => {
+      // Exhale 8s
+      phase.textContent = '口から吐く（8秒）';
+      circle.textContent = '吐く';
+      circle.className = 'breath-circle exhale';
+      setTimeout(() => {
+        breathCycle++;
+        document.getElementById('breathCycle').textContent = breathCycle;
+        startBreathCycle();
+      }, 8000);
+    }, 7000);
+  }, 4000);
+}
+
+function closeBreathing() {
+  document.getElementById('breathingModal').classList.remove('show');
+}
+
+// Notifications
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function showNotif(msg) {
+  const banner = document.getElementById('notifBanner');
+  banner.textContent = msg;
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 3500);
+}
+
+init();
+</script>
+</body>
+</html>
