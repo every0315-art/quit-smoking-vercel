@@ -276,11 +276,6 @@
       <span id="motivEmoji">💪</span>
     </div>
 
-    <div class="tabs" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">
-      <button class="tab active" onclick="showTab('home')">🏠 ホーム</button>
-      <button class="tab" onclick="showTab('therapy')">🕊️ 解放</button>
-    </div>
-
     <button class="emergency-btn" onclick="openCraving()" id="emergencyBtn">
       🚨 吸いたい衝動が到来
     </button>
@@ -427,7 +422,9 @@
 </div>
 
   <!-- Bottom Nav -->
-  <div style="position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; padding:8px 16px 24px; gap:6px; z-index:50;">
+  <div style="position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:8px 8px 24px; gap:4px; z-index:50;">
+    <button class="tab active" id="btn-home" onclick="showTab('home')">🏠 ホーム</button>
+    <button class="tab" id="btn-therapy" onclick="showTab('therapy')">🕊️ 解放</button>
     <button class="tab" id="btn-timeline" onclick="showTab('timeline')">💚 回復</button>
     <button class="tab" id="btn-learn" onclick="showTab('learn')">📖 学ぶ</button>
   </div>
@@ -699,9 +696,9 @@ function showTab(tab) {
   ['home','craving','therapy','timeline','learn'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
   });
-  const tabMap = { home: 0, therapy: 1, timeline: 2, learn: 3 };
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', i === tabMap[tab]);
+  ['home','therapy','timeline','learn'].forEach(t => {
+    const btn = document.getElementById('btn-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
   });
   if (tab === 'timeline') buildTimeline();
   if (tab === 'therapy') buildTherapy();
